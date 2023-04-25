@@ -1,3 +1,3 @@
-# latenetwork 0.0.1
+# latenetwork 0.1.0
 
-* First development version.
+* First version.

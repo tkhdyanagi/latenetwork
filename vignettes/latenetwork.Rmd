@@ -1,0 +1,259 @@
+---
+title: "Getting Started with the latenetwork Package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with the latenetwork Package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+
+```{r setup, include = FALSE}
+library(latenetwork)
+```
+
+## Introduction
+
+The **latenetwork** package provides tools for causal inference 
+under noncompliance with treatment assignment and 
+network interference of unknown form.
+The package enables to implement the instrumental variables (IV)
+estimation for the local average treatment effect (LATE) type parameters 
+via inverse probability weighting (IPW) using
+the concept of instrumental exposure mapping (IEM)
+and the framework of approximate neighborhood interference (ANI).
+
+The parameters of interest are as follows.
+
+- The average direct effect (ADE) parameters:
+  - The ADE of the IV on the outcome.
+  - The ADE of the IV on the treatment receipt.
+  - The local average direct effect (LADE).
+- The average indirect effect (AIE) parameters: 
+  - The AIE of the IV on the outcome.
+  - The AIE of the IV on the treatment receipt.
+  - The local average indirect effect (LAIE).
+- The average overall effect (AOE) parameters: 
+  - The AOE of the IV on the outcome.
+  - The AOE of the IV on the treatment receipt.
+  - The local average overall effect (LAOE).
+- The average spillover effect (ASE) parameters: 
+  - The ASE of the IV on the outcome.
+  - The ASE of the IV on the treatment receipt.
+  - The local average spillover effect (LASE).
+
+For more details on the identification and estimation methods,
+see the "Review of Causal Inference with Noncompliance and Unknown Interference" vignette with: `vignette("review", package = "latenetwork")`.
+
+## Installation
+
+You can install the **latenetwork** package with:
+
+```{r, eval = F, echo = T}
+# install.packages("devtools") # if necessary
+devtools::install_github("tkhdyanagi/latenetwork", build_vignettes = TRUE)
+```
+
+## Functions
+
+The **latenetwork** package provides the following functions:
+
+- `direct()`: Estimation and statistical inference for the ADE parameters.
+- `indirect()`: Estimation and statistical inference for the AIE parameters.
+- `overall()`: Estimation and statistical inference for the AOE parameters.
+- `spillover()`: Estimation and statistical inference for the ASE parameters.
+
+#### Arguments
+
+All package functions have the following arguments:
+
+- `Y`: An n-dimensional outcome vector.
+- `D`: An n-dimensional binary treatment vector.
+- `Z`: An n-dimensional binary instrumental vector.
+- `S`: An n-dimensional logical vector of indicating whether each unit belongs 
+to the sub-population on which the parameters of interest are defined.
+- `A`: An n times n symmetric binary adjacency matrix whose diagonal elements 
+are 0.
+- `K`: A scalar of indicating the range of neighborhood used for constructing 
+interference sets. 
+Default is 1.
+- `bw`: A scalar of bandwidth used for the HAC estimation 
+and the wild bootstrap. 
+If `bw = NULL`, the rule-of-thumb bandwidth proposed by Leung (2022) is used.
+Default is NULL.
+- `B`: The number of bootstrap repetitions.
+If `B = NULL`, the wild bootstrap is skipped. 
+Default is NULL.
+- `alp`: The significance level. 
+Default is 0.05.
+
+The `direct()` function has the following additional arguments:
+
+- `IEM`: An n-dimensional instrumental exposure vector.
+If `t = NULL`, the constant IEM is used.
+Default is NULL.
+- `t`: A scalar of the evaluation point of the IEM.
+If `t = NULL`, the constant IEM is used.
+Default is NULL.
+
+The `spillover()` function has the following additional arguments:
+
+- `IEM`: An n-dimensional instrumental exposure vector.
+- `z`: A scalar of the evaluation point of the IV.
+- `t0`: A scalar of the evaluation point of the IEM (from).
+- `t1`: A scalar of the evaluation point of the IEM (to).
+
+#### Returns
+
+Each function returns a data.frame with the following elements:
+
+- `est`: The estimate of each parameter.
+- `HAC_SE`: The standard error computed by the network HAC estimation.
+- `HAC_CI_L`: The lower bound of the confidence interval computed by 
+the network HAC estimation.
+- `HAC_CI_U`: The upper bound of the confidence interval computed by 
+the network HAC estimation.
+- `wild_SE`: The standard error computed by the wild bootstrap.
+- `wild_CI_L`: The lower bound of the confidence interval computed by 
+the wild bootstrap.
+- `wild_CI_U`: The upper bound of the confidence interval computed by 
+the wild bootstrap.
+- `bw`: The bandwidth used for the HAC estimation 
+and the wild bootstrap
+- `size`: The size of the subpopulation `S`:
+
+## Example
+
+To run the following example, install the **igraph** package if necessary.
+
+```{r, eval = F, echo = T}
+# if necessary -----------------------------------------------------------------
+install.packages("igraph")
+```
+
+Generate artificial data from the `datageneration()` function.
+
+```{r, eval = T, echo = T}
+# Generate artificial data from a ring network----------------------------------
+set.seed(1)
+n <- 2000
+data <- latenetwork::datageneration(n = n)
+```
+
+Perform the causal inference with:
+
+```{r, eval = T, echo = T}
+# Arguments --------------------------------------------------------------------
+Y   <- data$Y
+D   <- data$D
+Z   <- data$Z
+A   <- data$A
+IEM <- ifelse(A %*% Z > 0, 1, 0)
+S   <- rep(TRUE, n)
+K   <- 1
+z   <- 1
+t   <- 0
+t0  <- 0
+t1  <- 1
+bw  <- NULL
+B   <- NULL
+alp <- 0.05
+
+# Causal inference -------------------------------------------------------------
+
+# The ADE parameters defined by IEM = (A %*% Z > 0)
+result_direct1 <- latenetwork::direct(Y = Y,
+                                      D = D,
+                                      Z = Z,
+                                      IEM = IEM,
+                                      S = S,
+                                      A = A,
+                                      K = K,
+                                      t = t,
+                                      bw = bw,
+                                      B = B,
+                                      alp = alp)
+
+# The ADE parameters defined by the constant IEM
+result_direct2 <- latenetwork::direct(Y = Y,
+                                      D = D,
+                                      Z = Z,
+                                      IEM = NULL,
+                                      S = S,
+                                      A = A,
+                                      K = K,
+                                      t = NULL,
+                                      bw = bw,
+                                      B = B,
+                                      alp = alp)
+
+# The AIE parameters defined by K = 1
+result_indirect <- latenetwork::indirect(Y = Y,
+                                         D = D,
+                                         Z = Z,
+                                         S = S,
+                                         A = A,
+                                         K = K,
+                                         bw = bw,
+                                         B = B,
+                                         alp = alp)
+
+# The AOE parameters defined by K = 1
+result_overall <- latenetwork::overall(Y = Y,
+                                       D = D,
+                                       Z = Z,
+                                       S = S,
+                                       A = A,
+                                       K = K,
+                                       bw = bw,
+                                       B = B,
+                                       alp = alp)
+
+# The ASE parameters defined by IEM = (A %*% Z > 0)
+result_spillover <- latenetwork::spillover(Y = Y,
+                                           D = D,
+                                           Z = Z,
+                                           IEM = IEM,
+                                           S = S,
+                                           A = A,
+                                           K = K,
+                                           z = z,
+                                           t0 = t0,
+                                           t1 = t1,
+                                           bw = bw,
+                                           B = B,
+                                           alp = alp)
+```
+
+You can see the estimation results with:
+```{r, eval = T, echo = T}
+result_direct1
+
+result_direct2
+
+result_indirect
+
+result_overall
+
+result_spillover
+```
+
+## References
+
+Hoshino, T. and Yanagi, T., 2023. 
+Causal inference with noncompliance and unknown interference. 
+arXiv preprint arXiv:2108.07455.
+[Link](https://doi.org/10.48550/arXiv.2108.07455)
+
+Leung, M.P. (2022).
+Causal inference under approximate neighborhood interference.
+Econometrica, 90(1), pp.267-293.
+[Link](https://doi.org/10.3982/ECTA17841)

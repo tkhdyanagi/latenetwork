@@ -1,0 +1,308 @@
+---
+title: "Review of Causal Inference with Noncompliance and Unknown Interference"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Review of Causal Inference with Noncompliance and Unknown Interference}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+```{r setup, include = FALSE}
+library(latenetwork)
+```
+
+## Introduction
+
+This vignette reviews the identification and estimation methods developed by [Hoshino and Yanagi (2023) "Causal inference with noncompliance and unknown interference"](https://doi.org/10.48550/arXiv.2108.07455).
+
+## Setup
+
+#### Variable Definitions
+
+Consider a finite population of $n$ units, $N_n = \{ 1, \dots, n \}$.
+Let $A_{ij} \in \{ 0, 1 \}$ indicate whether or not units $i$ and $j$ are adjacent, that is, $A_{ij} = 1$ if there is a link between $i$ and $j$ and $A_{ij} = 0$ otherwise.
+Assume $A_{ij} = A_{ji}$ for all $i,j \in N_n$ and $A_{ii} = 0$ for all $i \in N_n$.
+
+For each unit $i \in N_n$, we observe:
+
+- $Y_i \in \mathbb{R}$: An outcome variable.
+- $D_i \in \{ 0, 1 \}$: A binary treatment.
+- $Z_i \in \{ 0, 1 \}$: A binary IV.
+
+Let:
+
+- $\mathbf{D} = (D_i)_{i \in N_n}$.
+- $\mathbf{Z} = (Z_i)_{i \in N_n}$.
+- $Y_i(\mathbf{d}, \mathbf{z})$: The potential outcome of unit $i$ given $\mathbf{D} = \mathbf{d}$ and $\mathbf{Z} = \mathbf{z}$.
+- $D_i(\mathbf{z})$: The potential treatment status of unit $i$ given $\mathbf{Z} = \mathbf{z}$.
+- $\mathbf{D}(\mathbf{z}) = (D_i(\mathbf{z}))_{i \in N_n}$.
+
+Then, we can define the potential outcome given $\mathbf{Z} = \mathbf{z}$ by 
+\begin{align*}
+  y_i(\mathbf{z}) = Y_i(\mathbf{D}(\mathbf{z}), \mathbf{z}).
+\end{align*}
+We often write this potential outcome as $y_i(Z_j = z_j, \mathbf{Z}_{-j} = \mathbf{z}_{-j})$, where $i$ may differ from $j$.
+When $i = j$, we simply write $y_i(z_i, \mathbf{z}_{-i})$.
+
+#### Instrumental Exposure
+
+In the presence of network spillovers, it is generally impossible to define identifiable causal estimands without introducing some restrictions.
+To address this issue, we consider an instrumental exposure $T_i$ for each $i$.
+For example:
+
+- $T_i = \mathbf{1}\{ \sum_{j \neq i} A_{ij} Z_j > 0 \}$: Whether at least one of the direct neighbors of unit $i$ is treatment "eligible".
+- $T_i = \mathbf{1}\{ \sum_{j \neq i} A_{ij} D_j > 0 \}$: Whether at least one of the direct neighbors of unit $i$ is treated.
+
+Assume that the instrumental exposure $T_i$ for each $i$ is determined from unit $i$'s $K$-neighborhood with some $K \ge 1$.
+For example, $K = 1$ in the examples above.
+
+Denote the support of the instrumental exposure as $\mathcal{T}$.
+
+The main motivation of [Hoshino and Yanagi (2023)](https://doi.org/10.48550/arXiv.2108.07455) is to allow the possibility that the user-specified instrumental exposure $T_i$ is "incorrect".
+See the paper for more details.
+
+## Intention-to-treat Estimands
+
+#### Average Direct Effect (ADE)
+
+Consider a sub-population $S_n \subseteq N_n$.
+For example, we can consider the set of units whose degrees are $\delta \ge 1$: 
+\begin{align*}
+  S_n(\delta) = \left\{ i \in N_n : \sum_{j \neq i} A_{ij} = \delta \right\}.
+\end{align*}
+
+For $z \in \{ 0, 1 \}$ and $t \in \mathcal{T}$, let
+\begin{align*}
+  \mu_i^Y(z, t) = \mathbb{E}[ Y_i \mid Z_i = z, T_i = t ],
+  \qquad
+  \mu_i^D(z, t) = \mathbb{E}[ D_i \mid Z_i = z, T_i = t ],
+\end{align*}
+and
+\begin{align*}
+  \bar \mu_{S_n}^Y(z, t) = \frac{1}{|S_n|} \sum_{i \in S_n} \mu_i^Y(z, t),
+  \qquad
+  \bar \mu_{S_n}^D(z, t) = \frac{1}{|S_n|} \sum_{i \in S_n} \mu_i^D(z, t),
+\end{align*}
+where $|S_n|$ denotes the cardinality of $S_n$.
+
+The ADE of the IV on the outcome and that on the treatment receipt are defined by
+\begin{align*}
+  \mathrm{ADEY}_{S_n}(t) = \bar \mu_{S_n}^Y(1, t) - \bar \mu_{S_n}^Y(0, t),
+  \qquad
+  \mathrm{ADED}_{S_n}(t) = \bar \mu_{S_n}^D(1, t) - \bar \mu_{S_n}^D(0, t).
+\end{align*}
+These estimands help us to understand 
+the average effect of the unit's own IV on the unit's own outcome and that on the unit's own treatment.
+
+We do not rule out the possibility that `t = NULL`.
+When `t = NULL`, we simply write $\mathrm{ADEY}_{S_n}$ and $\mathrm{ADED}_{S_n}$, that is,
+\begin{align*}
+  \mathrm{ADEY}_{S_n} = \bar \mu_{S_n}^Y(1) - \bar \mu_{S_n}^Y(0),
+  \qquad
+  \mathrm{ADED}_{S_n} = \bar \mu_{S_n}^D(1) - \bar \mu_{S_n}^D(0),
+\end{align*}
+where 
+\begin{align*}
+  \bar \mu_{S_n}^Y(z) = \frac{1}{|S_n|} \sum_{i \in S_n} \mu_i^Y(z),
+  \qquad
+  \bar \mu_{S_n}^D(z) = \frac{1}{|S_n|} \sum_{i \in S_n} \mu_i^D(z)
+\end{align*}
+with $\mu_i^Y(z) = \mathbb{E}[ Y_i \mid Z_i = z ]$ and $\mu_i^D(z) = \mathbb{E}[ D_i \mid Z_i = z ]$.
+
+#### Average Indirect Effect (AIE)
+
+For $z \in \{ 0, 1 \}$, let
+\begin{align*}
+  \mu_{ji}^Y(z) = \mathbb{E}[ Y_j \mid Z_i = z ],
+  \qquad
+  \mu_{ji}^D(z) = \mathbb{E}[ D_j \mid Z_i = z ],
+\end{align*}
+and
+\begin{align*}
+  \bar \mu_{S_n}^Y(z; \mathcal{E}) = \frac{1}{|S_n|} \sum_{i \in S_n} \sum_{j \in \mathcal{E}_i} \mu_{ji}^Y(z),
+  \qquad
+  \bar \mu_{S_n}^D(z; \mathcal{E}) = \frac{1}{|S_n|} \sum_{i \in S_n} \sum_{j \in \mathcal{E}_i} \mu_{ji}^D(z),
+\end{align*}
+where $\mathcal{E}_i$ denotes the set of unit $j \neq i$ who belong to unit $i$'s $K$-neighborhood.
+
+The AIE of the IV on the outcome and that on the treatment receipt are defined by
+\begin{align*}
+  \mathrm{AIEY}_{S_n} = \bar \mu_{S_n}^Y(1; \mathcal{E}) - \bar \mu_{S_n}^Y(0; \mathcal{E}),
+  \qquad
+  \mathrm{AIED}_{S_n} = \bar \mu_{S_n}^D(1; \mathcal{E}) - \bar \mu_{S_n}^D(0; \mathcal{E}).
+\end{align*}
+These estimands are helpful in understanding the average effect of the unit's own IV on the sum of the outcomes of others and that on the sum of the treatments of others.
+
+#### Average Overall Effect (AOE)
+
+The AOE of the IV on the outcome and that on the treatment receipt are defined by
+\begin{align*}
+  \mathrm{AOEY}_{S_n} = \mathrm{ADEY}_{S_n} + \mathrm{AIEY}_{S_n},
+  \qquad
+  \mathrm{AOED}_{S_n} = \mathrm{ADED}_{S_n} + \mathrm{AIED}_{S_n}.
+\end{align*}
+These estimands are useful for understanding the average effect of the unit's own IV on the sum of the unit's own outcome and the outcomes of others and that on the sum of the unit's own treatment and the treatments of others.
+
+#### Average Spillover Effect (ASE)
+
+For $z \in \{ 0, 1 \}$ and $t \neq t'$, the ASE of the instrumental exposure on the outcome and that on the treatment receipt are defined by
+\begin{align*}
+  \mathrm{ASEY}_{S_n}(z, t, t') = \bar \mu_{S_n}^Y(z, t) - \bar \mu_{S_n}^Y(z, t'),
+  \qquad
+  \mathrm{ASED}_{S_n}(z, t, t') = \bar \mu_{S_n}^D(z, t) - \bar \mu_{S_n}^D(z, t').
+\end{align*}
+If the pre-specified instrumental exposure $T_i$ is "correct" (cf. [Hoshino and Yanagi, 2023](https://doi.org/10.48550/arXiv.2108.07455)), these estimands allow us to understand the average spillover effect caused by changing the instrumental values of others on the outcome and that on the treatment receipt.
+However, if the pre-specified instrumental exposure $T_i$ is "incorrect", these estimands do not generally have sensible causal interpretation.
+Accordingly, we should be cautious in interpreting the empirical results obtained by the ASE parameters.
+
+## Local Average Treatment Effect Type Parameters
+
+The ITT parameters may underestimate the effect of the treatment receipt on the outcome.
+To address this issue, [Hoshino and Yanagi (2023)](https://doi.org/10.48550/arXiv.2108.07455) extend the notion of compliers and the local average treatment effect (LATE) type parameters to the current setting.
+
+#### Local Average Direct Effect (LADE)
+
+Let $\mathcal{C}_i(\mathbf{z}_{-i}) = \mathbf{1}\{ D_i(1, \mathbf{z}_{-i}) = 1, D_i(0, \mathbf{z}_{-i}) = 0 \}$ indicate the compliance status of unit $i$ given $\mathbf{Z}_{-i} = \mathbf{z}_{-i}$.
+
+The LADE is defined by
+\begin{align*}
+  \mathrm{LADE}_{S_n}(t)
+  = \sum_{i \in S_n} \sum_{\mathbf{z}_{-i} \in \{ 0, 1 \}^{n-1}} \{ y_i(1, \mathbf{z}_{-i}) - y_i(0, \mathbf{z}_{-i}) \} \frac{ \mathcal{C}_i(\mathbf{z}_{-i}) \pi_i(\mathbf{z}_{-i}, t) }{ \sum_{i \in S_n} \sum_{\mathbf{z}_{-i} \in \{ 0, 1 \}^{n-1}} \mathcal{C}_i(\mathbf{z}_{-i}) \pi_i(\mathbf{z}_{-i}, t) },
+\end{align*}
+where $\pi_i(\mathbf{z}_{-i}, t) = \Pr[ \mathbf{Z}_{-i} = \mathbf{z}_{-i} \mid T_i = t ]$.
+It is useful for understanding the average effect of the unit's own treatment on the unit's own outcome for the compliers.
+
+If `t = NULL`, the LADE reduces to
+\begin{align*}
+  \mathrm{LADE}_{S_n}
+  = \sum_{i \in S_n} \sum_{\mathbf{z}_{-i} \in \{ 0, 1 \}^{n-1}} \{ y_i(1, \mathbf{z}_{-i}) - y_i(0, \mathbf{z}_{-i}) \} \frac{ \mathcal{C}_i(\mathbf{z}_{-i}) \pi_i(\mathbf{z}_{-i}) }{ \sum_{i \in S_n} \sum_{\mathbf{z}_{-i} \in \{ 0, 1 \}^{n-1}} \mathcal{C}_i(\mathbf{z}_{-i}) \pi_i(\mathbf{z}_{-i}) },
+\end{align*}
+where $\pi_i(\mathbf{z}_{-i}) = \Pr[ \mathbf{Z}_{-i} = \mathbf{z}_{-i} ]$.
+
+It is shown that the LADE is identifiable from the Wald type estimand:
+\begin{align*}
+  \mathrm{LADE}_{S_n}(t)
+  = \frac{ \mathrm{ADEY}_{S_n}(t) }{ \mathrm{ADED}_{S_n}(t) }
+\end{align*}
+
+#### Local Average Indirect Effect (LAIE)
+
+The LAIE is defined by
+\begin{align*}
+  \mathrm{LAIE}_{S_n}
+  = \sum_{i \in S_n} \sum_{\mathbf{z}_{-i} \in \{ 0, 1 \}^{n-1}} \sum_{j \in \mathcal{E}_i} \{ y_j(Z_i = 1, \mathbf{Z}_{-i} = \mathbf{z}_{-i}) - y_j(Z_i = 0, \mathbf{Z}_{-i} = \mathbf{z}_{-i}) \} \frac{ \mathcal{C}_i(\mathbf{z}_{-i}) \pi_i(\mathbf{z}_{-i}) }{ \sum_{i \in S_n} \sum_{\mathbf{z}_{-i} \in \{ 0, 1 \}^{n-1}} \mathcal{C}_i(\mathbf{z}_{-i}) \pi_i(\mathbf{z}_{-i}) }.
+\end{align*}
+This parameter helps us understand the average effect of the complier's treatment on the sum of the outcomes of others.
+
+It is shown that the LAIE is identifiable from the Wald type estimand:
+\begin{align*}
+  \mathrm{LAIE}_{S_n}
+  = \frac{ \mathrm{AIEY}_{S_n} }{ \mathrm{ADED}_{S_n} }.
+\end{align*}
+Note that the denominator is $\mathrm{ADED}_{S_n}$, not $\mathrm{AIED}_{S_n}$.
+
+#### Local Average Overall Effect (LAOE)
+
+The LAOE is defined by
+\begin{align*}
+  \mathrm{LAOE}_{S_n}
+  = \mathrm{LADE}_{S_n} + \mathrm{LAIE}_{S_n}.
+\end{align*}
+
+The LAOE is informative about the average effect of the compiler's treatment on the sum of the compiler's own outcome and the outcomes of others.
+
+It is trivial from the identification results for the LADE and LAIE parameters that the LAOE is identified by
+\begin{align*}
+  \mathrm{LAOE}_{S_n}
+  = \frac{ \mathrm{AOEY}_{S_n} }{ \mathrm{ADED}_{S_n} }.
+\end{align*}
+
+#### Local Average Spillover Effect (LASE)
+
+As discussed above, the ASE parameters do not admit meaningful causal interpretation if the pre-specified instrumental exposure is "incorrect".
+For this reason, to define the LASE parameter, we assume that the pre-specified instrumental exposure is "correct" so that the potential outcome and the potential treatment status given $Z_i = z$ and $T_i = t$ are well-defined.
+Denote these variables as $\tilde y_i(z, t)$ and $\tilde d_i(z, t)$.
+Letting $\tilde{\mathcal{C}}_i(z, t, t') = \mathbf{1}\{ \tilde d_i(z, t) = 1, \tilde d_i(z, t') = 0 \}$, the LASE is defined by
+\begin{align*}
+  \mathrm{LASE}_{S_n}(z, t, t')
+  = \sum_{i \in S_n} \{ \tilde y_i(z, t) - \tilde y_i(z, t') \} \frac{ \tilde{\mathcal{C}}_i(z, t, t') }{ \sum_{i \in S_n} \tilde{\mathcal{C}}_i(z, t, t') }.
+\end{align*}
+Note that the LASE is no longer well-defined if the pre-specified $T_i$ is "incorrect".
+
+It is shown that the LASE is identifiable from the Wald type estimand:
+\begin{align*}
+  \mathrm{LASE}_{S_n}(z, t, t')
+  = \frac{ \mathrm{ASEY}_{S_n}(z, t, t') }{ \mathrm{ASED}_{S_n}(z, t, t') }.
+\end{align*}
+
+## Estimation
+
+We can estimate $\bar \mu_{S_n}^Y(z, t)$ and $\bar \mu_{S_n}^D(z, t)$ by
+\begin{align*}
+  \widehat \mu_{S_n}^Y(z, t) & = \frac{1}{|S_n|} \sum_{i \in S_n} \frac{Y_i \cdot \mathbf{1}\{ Z_i = z, T_i = t \}}{\widehat p_{S_n}(z, t)}, \\
+  \widehat \mu_{S_n}^D(z, t) & = \frac{1}{|S_n|} \sum_{i \in S_n} \frac{D_i \cdot \mathbf{1}\{ Z_i = z, T_i = t \}}{\widehat p_{S_n}(z, t)},
+\end{align*}
+where
+\begin{align*}
+  \widehat p_{S_n}(z, t)
+  = \frac{1}{|S_n|} \sum_{i \in S_n} \mathbf{1}\{ Z_i = z, T_i = t \}.
+\end{align*}
+Similarly, $\bar \mu_{S_n}^Y(z; \mathcal{E})$ and $\bar \mu_{S_n}^D(z; \mathcal{E})$ can be estimated by
+\begin{align*}
+  \widehat \mu_{S_n}^Y(z; \mathcal{E}) & = \frac{1}{|S_n|} \sum_{i \in S_n} \sum_{j \in \mathcal{E}_i} \frac{Y_j \cdot \mathbf{1}\{ Z_i = z \}}{\widehat p_{S_n}(z)}, \\
+  \bar \mu_{S_n}^D(z; \mathcal{E}) & = \frac{1}{|S_n|} \sum_{i \in S_n} \sum_{j \in \mathcal{E}_i} \frac{D_j \cdot \mathbf{1}\{ Z_i = z \}}{\widehat p_{S_n}(z)},
+\end{align*}
+where
+\begin{align*}
+  \widehat p_{S_n}(z)
+  = \frac{1}{|S_n|} \sum_{i \in S_n} \mathbf{1}\{ Z_i = z \}.
+\end{align*}
+
+We can estimate the ADE parameters by
+\begin{align*}
+  \widehat{\mathrm{ADEY}}_{S_n}(t) & = \widehat \mu_{S_n}^Y(1, t) - \widehat \mu_{S_n}^Y(0, t), \\
+  \widehat{\mathrm{ADED}}_{S_n}(t) & = \widehat \mu_{S_n}^D(1, t) - \widehat \mu_{S_n}^D(0, t), \\
+  \widehat{\mathrm{LADE}}_{S_n}(t) & = \frac{ \widehat{\mathrm{ADEY}}_{S_n}(t) }{ \widehat{\mathrm{ADED}}_{S_n}(t) }.
+\end{align*}
+
+The AIE parameters can be estimated by
+\begin{align*}
+    \widehat{\mathrm{AIEY}}_{S_n} & = \widehat \mu_{S_n}^Y(1; \mathcal{E}) - \widehat \mu_{S_n}^Y(0; \mathcal{E}), \\
+    \widehat{\mathrm{AIED}}_{S_n} & = \widehat \mu_{S_n}^D(1; \mathcal{E}) - \widehat \mu_{S_n}^D(0; \mathcal{E}), \\
+    \widehat{\mathrm{LAIE}}_{S_n} & = \frac{ \widehat{\mathrm{AIEY}}_{S_n} }{ \widehat{\mathrm{ADED}}_{S_n} }.
+\end{align*}
+
+The AOE estimators are given by
+\begin{align*}
+    \widehat{\mathrm{AOEY}}_{S_n} & = \widehat{\mathrm{ADEY}}_{S_n} + \widehat{\mathrm{AIEY}}_{S_n}, \\
+    \widehat{\mathrm{AOED}}_{S_n} & = \widehat{\mathrm{ADED}}_{S_n} + \widehat{\mathrm{AIED}}_{S_n}, \\
+    \widehat{\mathrm{LAOE}}_{S_n} & = \widehat{\mathrm{LADE}}_{S_n} + \widehat{\mathrm{LAIE}}_{S_n}.
+\end{align*}
+
+The ASE estimators are
+\begin{align*}
+  \widehat{\mathrm{ASEY}}_{S_n}(z, t, t') & = \widehat \mu_{S_n}^Y(z, t) - \widehat \mu_{S_n}^Y(z, t'), \\
+  \widehat{\mathrm{ASED}}_{S_n}(z, t, t') & = \widehat \mu_{S_n}^D(z, t) - \widehat \mu_{S_n}^D(z, t'), \\
+  \widehat{\mathrm{LASE}}_{S_n}(z, t, t') & = \frac{ \widehat{\mathrm{ASEY}}_{S_n}(z, t, t') }{ \widehat{\mathrm{ASED}}_{S_n}(z, t, t') }.
+\end{align*}
+
+## Statistical Inference
+
+The proposed estimators are consistent and asymptotically normally distributed under the assumption of approximate neighborhood interference (ANI) and certain restriction on the denseness of the network structure.
+Given this result, we can perform the statistical inference on the causal parameters based on network HAC estimation and a wild bootstrap approach.
+For more details, see [Hoshino and Yanagi (2023)](https://doi.org/10.48550/arXiv.2108.07455).
+
+## References
+
+Hoshino, T. and Yanagi, T., 2023. 
+Causal inference with noncompliance and unknown interference. 
+arXiv preprint arXiv:2108.07455.
+[Link](https://doi.org/10.48550/arXiv.2108.07455)
