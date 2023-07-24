@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">latenetwork</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -157,7 +157,9 @@ the ASE parameters.</li>
 <li>
 <code>Y</code>: An n-dimensional outcome vector.</li>
 <li>
-<code>D</code>: An n-dimensional binary treatment vector.</li>
+<code>D</code>: An n-dimensional binary treatment vector. Set
+<code>D</code> to the same argument as <code>Z</code> if you would like
+to perform the intention-to-treat analysis only.</li>
 <li>
 <code>Z</code>: An n-dimensional binary instrumental vector.</li>
 <li>
@@ -245,9 +247,9 @@ wild bootstrap</li>
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
 <p>To run the following example, install the <strong>igraph</strong>
-package if necessary.</p>
+package if needed.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># if necessary -----------------------------------------------------------------</span></span>
+<code class="sourceCode R"><span><span class="co"># if needed --------------------------------------------------------------------</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"igraph"</span><span class="op">)</span></span></code></pre></div>
 <p>Generate artificial data from the <code><a href="../reference/datageneration.html">datageneration()</a></code>
 function.</p>
