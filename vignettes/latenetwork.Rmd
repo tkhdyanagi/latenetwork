@@ -77,6 +77,8 @@ All package functions have the following arguments:
 
 - `Y`: An n-dimensional outcome vector.
 - `D`: An n-dimensional binary treatment vector.
+Set `D` to the same argument as `Z` 
+if you would like to perform the intention-to-treat analysis only. 
 - `Z`: An n-dimensional binary instrumental vector.
 - `S`: An n-dimensional logical vector of indicating whether each unit belongs 
 to the sub-population on which the parameters of interest are defined.
@@ -132,10 +134,10 @@ and the wild bootstrap
 
 ## Example
 
-To run the following example, install the **igraph** package if necessary.
+To run the following example, install the **igraph** package if needed.
 
 ```{r, eval = F, echo = T}
-# if necessary -----------------------------------------------------------------
+# if needed --------------------------------------------------------------------
 install.packages("igraph")
 ```
 

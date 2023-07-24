@@ -1,3 +1,7 @@
+# latenetwork 0.1.2
+
+* Updated DESCRIPTION, README, and vignettes.
+
 # latenetwork 0.1.1
 
 * Added GitHub Pages.

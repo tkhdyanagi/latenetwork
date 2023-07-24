@@ -31,10 +31,16 @@ see [Hoshino and Yanagi (2023) "Causal inference with noncompliance and unknown 
 
 ## Installation
 
-Get the package from GitHub:
+Get the package from CRAN:
 
 ```{r, eval = F, echo = T}
-# install.packages("devtools") # if necessary
+install.packages("latenetwork")
+```
+
+or from GitHub:
+
+```{r, eval = F, echo = T}
+# install.packages("devtools") # if needed
 devtools::install_github("tkhdyanagi/latenetwork", build_vignettes = TRUE)
 ```
 

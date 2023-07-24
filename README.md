@@ -18,10 +18,16 @@ unknown interference”](https://doi.org/10.48550/arXiv.2108.07455).
 
 ## Installation
 
-Get the package from GitHub:
+Get the package from CRAN:
 
 ``` r
-# install.packages("devtools") # if necessary
+install.packages("latenetwork")
+```
+
+or from GitHub:
+
+``` r
+# install.packages("devtools") # if needed
 devtools::install_github("tkhdyanagi/latenetwork", build_vignettes = TRUE)
 ```
 

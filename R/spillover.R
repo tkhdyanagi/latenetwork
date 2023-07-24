@@ -45,7 +45,7 @@
 #' @param alp The significance level.
 #' Default is 0.05.
 #'
-#' @returns A data frame with the following elements:
+#' @returns A data frame containing the following elements:
 #' \item{est}{The parameter estimate}
 #' \item{HAC_SE}{The standard error computed by the network HAC estimation}
 #' \item{HAC_CI_L}{The lower bound of the confidence interval computed by

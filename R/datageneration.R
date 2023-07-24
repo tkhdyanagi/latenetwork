@@ -6,7 +6,7 @@
 #'
 #' @param n The sample size
 #'
-#' @returns A list that contains the outcome vector, the treatment vector,
+#' @returns A list containing the outcome vector, the treatment vector,
 #' the instrumental vector, and the true instrumental exposure vector, and
 #' the symmetric binary adjacency matrix.
 #'

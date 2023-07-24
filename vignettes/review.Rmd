@@ -54,7 +54,7 @@ When $i = j$, we simply write $y_i(z_i, \mathbf{z}_{-i})$.
 
 #### Instrumental Exposure
 
-In the presence of network spillovers, it is generally impossible to define identifiable causal estimands without introducing some restrictions.
+In the presence of network spillover, it is generally impossible to define identifiable causal estimands without introducing some restrictions.
 To address this issue, we consider an instrumental exposure $T_i$ for each $i$.
 For example:
 
@@ -131,7 +131,7 @@ and
   \qquad
   \bar \mu_{S_n}^D(z; \mathcal{E}) = \frac{1}{|S_n|} \sum_{i \in S_n} \sum_{j \in \mathcal{E}_i} \mu_{ji}^D(z),
 \end{align*}
-where $\mathcal{E}_i$ denotes the set of unit $j \neq i$ who belong to unit $i$'s $K$-neighborhood.
+where $\mathcal{E}_i$ denotes the set of units $j \neq i$ who belong to unit $i$'s $K$-neighborhood.
 
 The AIE of the IV on the outcome and that on the treatment receipt are defined by
 \begin{align*}
