@@ -2,7 +2,7 @@
 #'
 #' Inference on the average overall effect of the IV on the outcome,
 #' that on the treatment receipt, and the local average overall effect
-#' in the presence of network spillovers of unknown form
+#' in the presence of network spillover of unknown form
 #'
 #' @details
 #' The `overall()` function estimates the average overall effect of the IV
@@ -98,7 +98,7 @@ overall <- function(Y,
                     S,
                     A,
                     K = 1,
-                    bw = 2,
+                    bw = NULL,
                     B = NULL,
                     alp = 0.05) {
 
@@ -121,7 +121,7 @@ overall <- function(Y,
                                                 mode = "undirected")
 
   distance0 <- igraph::distances(graph = graph0,
-                                 v =  igraph::V(graph0),
+                                 v  = igraph::V(graph0),
                                  to = igraph::V(graph0),
                                  algorithm = "dijkstra")
 
@@ -138,7 +138,7 @@ overall <- function(Y,
                                                mode = "undirected")
   distance <- distance0[S, S]
 
-  # The size of the sub-population S
+  # Size of the sub-population S
   size <- sum(S)
 
   # List of neighbors
@@ -148,7 +148,7 @@ overall <- function(Y,
     neighbor_list <- append(neighbor_list, list(neighbor))
   }
 
-  # Bandwidth -----------------------------------------------------------------
+  # Bandwidth ------------------------------------------------------------------
 
   if (is.null(bw)) {
 
@@ -184,12 +184,16 @@ overall <- function(Y,
 
   # Causal inference -----------------------------------------------------------
 
-  # Generalized propensity score
+  # Function to compute the generalized propensity score
+  # Input "z": A value of IV
+  # Output: A value of GPS
   GPS <- function(z) {
     mean(Z == z)
   }
 
-  # Conditional outcome mean
+  # Function to compute the conditional outcome mean
+  # Input "z": A value of IV
+  # Output: A value of the conditional outcome mean
   mu_Y <- function(z) {
     summand <- rep(0, size)
     for (i in 1:size) {
@@ -201,7 +205,9 @@ overall <- function(Y,
     return(mean(summand))
   }
 
-  # Conditional treatment mean to compute AOED
+  # Function to compute the conditional treatment mean for AOED
+  # Input "z": A value of IV
+  # Output: A value of the conditional treatment mean for AOED
   mu_D_AOED <- function(z) {
     summand <- rep(0, size)
     for (i in 1:size) {
@@ -213,27 +219,37 @@ overall <- function(Y,
     return(mean(summand))
   }
 
-  # Conditional treatment mean to compute ADED
+  # Function to compute the conditional treatment mean for ADED
+  # Input "z": A value of IV
+  # Output: A value of the conditional treatment mean for ADED
   mu_D_ADED <- function(z) {
     mean(D * (Z == z)) / GPS(z = z)
   }
 
-  # Average overall effect on outcome
+  # Function to compute AOEY
+  # Input: Nothing
+  # Output: A value of AOEY
   AOEY <- function() {
     mu_Y(z = 1) - mu_Y(z = 0)
   }
 
-  # Average overall effect on treatment
+  # Function to compute AOED
+  # Input: Nothing
+  # Output: A value of AOED
   AOED <- function() {
     mu_D_AOED(z = 1) - mu_D_AOED(z = 0)
   }
 
-  # Average direct effect on treatment
+  # Function to compute ADED
+  # Input: Nothing
+  # Output: A value of ADED
   ADED <- function() {
     mu_D_ADED(z = 1) - mu_D_ADED(z = 0)
   }
 
-  # Local average overall effect
+  # Function to compute LAOE
+  # Input: Nothing
+  # Output: A value of LAOE
   LAOE <- function() {
     AOEY() / ADED()
   }
@@ -275,7 +291,9 @@ overall <- function(Y,
 
   V_LAOE <- V_AOEY / est_ADED - V_ADED * est_AOEY / est_ADED^2
 
-  # HAC standard error and confidence interval
+  # Function to compute HAC standard error and confidence interval
+  # Input: Nothing
+  # Output: A list containing HAC standard error and confidence interval
   HAC_func <- function() {
 
     # Standard error
@@ -315,7 +333,9 @@ overall <- function(Y,
 
   }
 
-  # Compute Omega used for wild bootstrap
+  # Function to compute the Omega matrix used for wild bootstrap
+  # Input: Nothing
+  # Output: the Omega matrix
   Omega_func <- function() {
 
     # Compute the numerator
@@ -340,7 +360,9 @@ overall <- function(Y,
 
   }
 
-  # Wild bootstrap standard error and confidence interval
+  # Function to compute wild bootstrap standard error and confidence interval
+  # Input: Nothing
+  # Output: A list containing bootstrap standard error and confidence interval
   wild_func <- function() {
 
     # Square root matrix of Omega

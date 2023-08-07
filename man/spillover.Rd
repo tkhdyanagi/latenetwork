@@ -4,7 +4,21 @@
 \alias{spillover}
 \title{Inference on Average Spillover Effect Parameters}
 \usage{
-spillover(Y, D, Z, IEM, S, A, K = 1, z, t0, t1, bw = 2, B = NULL, alp = 0.05)
+spillover(
+  Y,
+  D,
+  Z,
+  IEM,
+  S,
+  A,
+  K = 1,
+  z,
+  t0,
+  t1,
+  bw = NULL,
+  B = NULL,
+  alp = 0.05
+)
 }
 \arguments{
 \item{Y}{An n-dimensional outcome vector}
@@ -63,7 +77,7 @@ and the wild bootstrap}
 \description{
 Inference on the average spillover effect of the IV on the outcome,
 that on the treatment receipt, and the local average spillover effect
-in the presence of network spillovers of unknown form
+in the presence of network spillover of unknown form
 }
 \details{
 The \code{spillover()} function estimates the average spillover effect of the IV

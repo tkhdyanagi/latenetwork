@@ -2,7 +2,7 @@
 #'
 #' Inference on the average indirect effect of the IV on the outcome,
 #' that on the treatment receipt, and the local average indirect effect
-#' in the presence of network spillovers of unknown form
+#' in the presence of network spillover of unknown form
 #'
 #' @details
 #' The `indirect()` function estimates the average indirect effect of the IV
@@ -10,7 +10,7 @@
 #' the local average indirect effect via inverse probability weighting
 #' in the approximate neighborhood interference framework.
 #' The function also computes the standard errors and the confidence intervals
-#' for the traget parameters based on the network HAC estimation and
+#' for the target parameters based on the network HAC estimation and
 #' the wild bootstrap.
 #' For more details, see Hoshino and Yanagi (2023).
 #' The lengths of `Y`, `D`, `Z`, `S` and
@@ -67,10 +67,6 @@
 #' S   <- rep(TRUE, n)
 #' A   <- data$A
 #' K   <- 1
-#' z   <- 1
-#' t   <- 0
-#' t0  <- 0
-#' t1  <- 1
 #' bw  <- NULL
 #' B   <- NULL
 #' alp <- 0.05
@@ -102,7 +98,7 @@ indirect <- function(Y,
                      S,
                      A,
                      K = 1,
-                     bw = 2,
+                     bw = NULL,
                      B = NULL,
                      alp = 0.05) {
 
@@ -125,7 +121,7 @@ indirect <- function(Y,
                                                 mode = "undirected")
 
   distance0 <- igraph::distances(graph = graph0,
-                                 v =  igraph::V(graph0),
+                                 v  = igraph::V(graph0),
                                  to = igraph::V(graph0),
                                  algorithm = "dijkstra")
 
@@ -142,7 +138,7 @@ indirect <- function(Y,
                                                mode = "undirected")
   distance <- distance0[S, S]
 
-  # The size of the sub-population S
+  # Size of the sub-population S
   size <- sum(S)
 
   # List of neighbors
@@ -188,12 +184,16 @@ indirect <- function(Y,
 
   # Causal inference -----------------------------------------------------------
 
-  # Generalized propensity score
+  # Function to compute the generalized propensity score
+  # Input "z": A value of IV
+  # Output: A value of GPS
   GPS <- function(z) {
     mean(Z == z)
   }
 
-  # Conditional outcome mean
+  # Function to compute the conditional outcome mean
+  # Input "z": A value of IV
+  # Output: A value of the conditional outcome mean
   mu_Y <- function(z) {
     summand <- rep(0, size)
     for (i in 1:size) {
@@ -205,7 +205,9 @@ indirect <- function(Y,
     return(mean(summand))
   }
 
-  # Conditional treatment mean to compute AIED
+  # Function to compute the conditional treatment mean for AIED
+  # Input "z": A value of IV
+  # Output: A value of the conditional treatment mean for AIED
   mu_D_AIED <- function(z) {
     summand <- rep(0, size)
     for (i in 1:size) {
@@ -217,27 +219,37 @@ indirect <- function(Y,
     return(mean(summand))
   }
 
-  # Conditional treatment mean to compute ADED
+  # Function to compute the conditional treatment mean for ADED
+  # Input "z": A value of IV
+  # Output: A value of the conditional treatment mean for ADED
   mu_D_ADED <- function(z) {
     mean(D * (Z == z)) / GPS(z = z)
   }
 
-  # Average indirect effect on outcome
+  # Function to compute AIEY
+  # Input: Nothing
+  # Output: A value of AIEY
   AIEY <- function() {
     mu_Y(z = 1) - mu_Y(z = 0)
   }
 
-  # Average indirect effect on treatment
+  # Function to compute AIED
+  # Input: Nothing
+  # Output: A value of AIED
   AIED <- function() {
     mu_D_AIED(z = 1) - mu_D_AIED(z = 0)
   }
 
-  # Average direct effect on treatment
+  # Function to compute ADED
+  # Input: Nothing
+  # Output: A value of ADED
   ADED <- function() {
     mu_D_ADED(z = 1) - mu_D_ADED(z = 0)
   }
 
-  # Local average indirect effect
+  # Function to compute LAIE
+  # Input: Nothing
+  # Output: A value of LAIE
   LAIE <- function() {
     AIEY() / ADED()
   }
@@ -283,7 +295,9 @@ indirect <- function(Y,
 
   V_LAIE <- V_AIEY / est_ADED - V_ADED * est_AIEY / est_ADED^2
 
-  # HAC standard error and confidence interval
+  # Function to compute HAC standard error and confidence interval
+  # Input: Nothing
+  # Output: A list containing HAC standard error and confidence interval
   HAC_func <- function() {
 
     # Standard error
@@ -323,7 +337,9 @@ indirect <- function(Y,
 
   }
 
-  # Compute Omega used for wild bootstrap
+  # Function to compute the Omega matrix used for wild bootstrap
+  # Input: Nothing
+  # Output: the Omega matrix
   Omega_func <- function() {
 
     # Compute the numerator
@@ -348,7 +364,9 @@ indirect <- function(Y,
 
   }
 
-  # Wild bootstrap standard error and confidence interval
+  # Function to compute wild bootstrap standard error and confidence interval
+  # Input: Nothing
+  # Output: A list containing bootstrap standard error and confidence interval
   wild_func <- function() {
 
     # square root matrix of Omega

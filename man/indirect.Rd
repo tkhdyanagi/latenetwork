@@ -4,7 +4,7 @@
 \alias{indirect}
 \title{Inference on Average Indirect Effect Parameters}
 \usage{
-indirect(Y, D, Z, S, A, K = 1, bw = 2, B = NULL, alp = 0.05)
+indirect(Y, D, Z, S, A, K = 1, bw = NULL, B = NULL, alp = 0.05)
 }
 \arguments{
 \item{Y}{An n-dimensional outcome vector}
@@ -53,7 +53,7 @@ and the wild bootstrap}
 \description{
 Inference on the average indirect effect of the IV on the outcome,
 that on the treatment receipt, and the local average indirect effect
-in the presence of network spillovers of unknown form
+in the presence of network spillover of unknown form
 }
 \details{
 The \code{indirect()} function estimates the average indirect effect of the IV
@@ -61,7 +61,7 @@ on the outcome, that on the treatment receipt, and
 the local average indirect effect via inverse probability weighting
 in the approximate neighborhood interference framework.
 The function also computes the standard errors and the confidence intervals
-for the traget parameters based on the network HAC estimation and
+for the target parameters based on the network HAC estimation and
 the wild bootstrap.
 For more details, see Hoshino and Yanagi (2023).
 The lengths of \code{Y}, \code{D}, \code{Z}, \code{S} and
@@ -84,10 +84,6 @@ Z   <- data$Z
 S   <- rep(TRUE, n)
 A   <- data$A
 K   <- 1
-z   <- 1
-t   <- 0
-t0  <- 0
-t1  <- 1
 bw  <- NULL
 B   <- NULL
 alp <- 0.05

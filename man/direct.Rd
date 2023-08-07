@@ -74,7 +74,7 @@ and the wild bootstrap}
 \description{
 Inference on the average direct effect of the IV on the outcome,
 that on the treatment receipt, and the local average direct effect
-in the presence of network spillovers of unknown form
+in the presence of network spillover of unknown form
 }
 \details{
 The \code{direct()} function estimates the average direct effect of the IV

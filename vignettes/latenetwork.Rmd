@@ -55,10 +55,16 @@ see the "Review of Causal Inference with Noncompliance and Unknown Interference"
 
 ## Installation
 
-You can install the **latenetwork** package with:
+Get the package from CRAN:
 
 ```{r, eval = F, echo = T}
-# install.packages("devtools") # if necessary
+install.packages("latenetwork")
+```
+
+or from GitHub:
+
+```{r, eval = F, echo = T}
+# install.packages("devtools") # if needed
 devtools::install_github("tkhdyanagi/latenetwork", build_vignettes = TRUE)
 ```
 

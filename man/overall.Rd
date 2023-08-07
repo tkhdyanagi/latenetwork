@@ -4,7 +4,7 @@
 \alias{overall}
 \title{Inference on Average Overall Effect Parameters}
 \usage{
-overall(Y, D, Z, S, A, K = 1, bw = 2, B = NULL, alp = 0.05)
+overall(Y, D, Z, S, A, K = 1, bw = NULL, B = NULL, alp = 0.05)
 }
 \arguments{
 \item{Y}{An n-dimensional outcome vector}
@@ -53,7 +53,7 @@ and the wild bootstrap}
 \description{
 Inference on the average overall effect of the IV on the outcome,
 that on the treatment receipt, and the local average overall effect
-in the presence of network spillovers of unknown form
+in the presence of network spillover of unknown form
 }
 \details{
 The \code{overall()} function estimates the average overall effect of the IV

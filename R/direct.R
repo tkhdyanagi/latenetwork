@@ -2,7 +2,7 @@
 #'
 #' Inference on the average direct effect of the IV on the outcome,
 #' that on the treatment receipt, and the local average direct effect
-#' in the presence of network spillovers of unknown form
+#' in the presence of network spillover of unknown form
 #'
 #' @details
 #' The `direct()` function estimates the average direct effect of the IV
@@ -156,7 +156,7 @@ direct <- function(Y,
     IEM <- IEM[S]
   }
 
-  # The size of the sub-population S
+  # Size of the sub-population S
   size <- sum(S)
 
   # Bandwidth -----------------------------------------------------------------
@@ -195,32 +195,47 @@ direct <- function(Y,
 
   # Causal inference -----------------------------------------------------------
 
-  # Generalized propensity score
+  # Function to compute the generalized propensity score
+  # Input "z": A value of IV
+  # Input "t": A value of IEM
+  # Output: A value of GPS
   GPS <- function(z, t) {
     mean(Z == z & IEM == t)
   }
 
-  # Conditional outcome mean
+  # Function to compute the conditional outcome mean
+  # Input "z": A value of IV
+  # Input "t": A value of IEM
+  # Output: A value of the conditional outcome mean
   mu_Y <- function(z, t) {
     mean(Y * (Z == z & IEM == t)) / GPS(z = z, t = t)
   }
 
-  # Conditional treatment mean
+  # Function to compute the conditional treatment mean
+  # Input "z": A value of IV
+  # Input "t": A value of IEM
+  # Output: A value of the conditional treatment mean
   mu_D <- function(z, t) {
     mean(D * (Z == z & IEM == t)) / GPS(z = z, t = t)
   }
 
-  # Average direct effect of IV on outcome
+  # Function to compute ADEY(t)
+  # Input "t": A value of IEM
+  # Output: A value of ADEY(t)
   ADEY <- function(t) {
     mu_Y(z = 1, t = t) - mu_Y(z = 0, t = t)
   }
 
-  # Average direct effect of IV on treatment
+  # Function to compute ADED(t)
+  # Input "t": A value of IEM
+  # Output: A value of ADED(t)
   ADED <- function(t) {
     mu_D(z = 1, t = t) - mu_D(z = 0, t = t)
   }
 
-  # Local average direct effect
+  # Function to compute LADE(t)
+  # Input "t": A value of IEM
+  # Output: A value of LADE(t)
   LADE <- function(t) {
     ADEY(t = t) / ADED(t = t)
   }
@@ -249,7 +264,9 @@ direct <- function(Y,
 
   V_LADE <- V_ADEY / est_ADED - V_ADED * est_ADEY / est_ADED^2
 
-  # HAC standard error and confidence interval
+  # Function to compute HAC standard error and confidence interval
+  # Input: Nothing
+  # Output: A list containing HAC standard error and confidence interval
   HAC_func <- function() {
 
     # HAC standard error
@@ -283,7 +300,9 @@ direct <- function(Y,
 
   }
 
-  # Compute Omega used for wild bootstrap
+  # Function to compute the Omega matrix used for wild bootstrap
+  # Input: Nothing
+  # Output: the Omega matrix
   Omega_func <- function() {
 
     # Compute the numerator
@@ -308,7 +327,9 @@ direct <- function(Y,
 
   }
 
-  # Wild bootstrap standard error and confidence interval
+  # Function to compute wild bootstrap standard error and confidence interval
+  # Input: Nothing
+  # Output: A list containing bootstrap standard error and confidence interval
   wild_func <- function() {
 
     # Square root matrix of Omega

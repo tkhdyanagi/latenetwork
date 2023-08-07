@@ -1,3 +1,7 @@
+# latenetwork 1.0.0
+
+* First CRAN submission.
+
 # latenetwork 0.1.2
 
 * Updated DESCRIPTION, README, and vignettes.

@@ -2,7 +2,7 @@
 #'
 #' Inference on the average spillover effect of the IV on the outcome,
 #' that on the treatment receipt, and the local average spillover effect
-#' in the presence of network spillovers of unknown form
+#' in the presence of network spillover of unknown form
 #'
 #' @details
 #' The `spillover()` function estimates the average spillover effect of the IV
@@ -117,7 +117,7 @@ spillover <- function(Y,
                       z,
                       t0,
                       t1,
-                      bw = 2,
+                      bw = NULL,
                       B = NULL,
                       alp = 0.05) {
 
@@ -140,7 +140,7 @@ spillover <- function(Y,
                                                 mode = "undirected")
 
   distance0 <- igraph::distances(graph = graph0,
-                                 v =  igraph::V(graph0),
+                                 v  = igraph::V(graph0),
                                  to = igraph::V(graph0),
                                  algorithm = "dijkstra")
 
@@ -193,32 +193,53 @@ spillover <- function(Y,
 
   # Causal inference -----------------------------------------------------------
 
-  # Generalized propensity score
+  # Function to compute the generalized propensity score
+  # Input "z": A value of IV
+  # Input "t": A value of IEM
+  # Output: A value of GPS
   GPS <- function(z, t) {
     mean(Z == z & IEM == t)
   }
 
-  # Conditional outcome mean
+  # Function to compute the conditional outcome mean
+  # Input "z": A value of IV
+  # Input "t": A value of IEM
+  # Output: A value of the conditional outcome mean
   mu_Y <- function(z, t) {
     mean(Y * (Z == z & IEM == t)) / GPS(z = z, t = t)
   }
 
-  # Conditional treatment mean
+  # Function to compute the conditional treatment mean
+  # Input "z": A value of IV
+  # Input "t": A value of IEM
+  # Output: A value of the conditional treatment mean
   mu_D <- function(z, t) {
     mean(D * (Z == z & IEM == t)) / GPS(z = z, t = t)
   }
 
-  # Average spillover effect on outcome
+  # Function to compute ASEY(z, t0, t1)
+  # Input "z": A value of IV
+  # Input "t0": A value of IEM (from)
+  # Input "t1": A value of IEM (to)
+  # Output: A value of ASEY(z, t0, t1)
   ASEY <- function(z, t0, t1) {
     mu_Y(z = z, t = t1) - mu_Y(z = z, t = t0)
   }
 
-  # Average spillover effect on treatment
+  # Function to compute ASED(z, t0, t1)
+  # Input "z": A value of IV
+  # Input "t0": A value of IEM (from)
+  # Input "t1": A value of IEM (to)
+  # Output: A value of ASED(z, t0, t1)
   ASED <- function(z, t0, t1) {
     mu_D(z = z, t = t1) - mu_D(z = z, t = t0)
   }
 
-  # Local average spillover effect
+  # Function to compute LASE(z, t0, t1)
+  # Input "z": A value of IV
+  # Input "t0": A value of IEM (from)
+  # Input "t1": A value of IEM (to)
+  # Output: A value of LASE(z, t0, t1)
   LASE <- function(z, t0, t1) {
     ASEY(z = z, t0 = t0, t1 = t1) / ASED(z = z, t0 = t0, t1 = t1)
   }
@@ -247,7 +268,9 @@ spillover <- function(Y,
 
   V_LASE <- V_ASEY / est_ASED - V_ASED * est_ASEY / est_ASED^2
 
-  # HAC standard error and confidence interval
+  # Function to compute HAC standard error and confidence interval
+  # Input: Nothing
+  # Output: A list containing HAC standard error and confidence interval
   HAC_func <- function() {
 
     # HAC standard error
@@ -281,7 +304,9 @@ spillover <- function(Y,
 
   }
 
-  # Compute Omega used for wild bootstrap
+  # Function to compute the Omega matrix used for wild bootstrap
+  # Input: Nothing
+  # Output: the Omega matrix
   Omega_func <- function() {
 
     # Compute the numerator
@@ -306,7 +331,9 @@ spillover <- function(Y,
 
   }
 
-  # Wild bootstrap standard error and confidence interval
+  # Function to compute wild bootstrap standard error and confidence interval
+  # Input: Nothing
+  # Output: A list containing bootstrap standard error and confidence interval
   wild_func <- function() {
 
     # Square root matrix of Omega
