@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">latenetwork</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -125,9 +125,12 @@ Interference” vignette with:
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the <strong>latenetwork</strong> package with:</p>
+<p>Get the package from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("devtools") # if necessary</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"latenetwork"</span><span class="op">)</span></span></code></pre></div>
+<p>or from GitHub:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># install.packages("devtools") # if needed</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"tkhdyanagi/latenetwork"</span>, build_vignettes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -248,18 +251,18 @@ wild bootstrap</li>
 </h2>
 <p>To run the following example, install the <strong>igraph</strong>
 package if needed.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># if needed --------------------------------------------------------------------</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"igraph"</span><span class="op">)</span></span></code></pre></div>
 <p>Generate artificial data from the <code><a href="../reference/datageneration.html">datageneration()</a></code>
 function.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generate artificial data from a ring network----------------------------------</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">2000</span></span>
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">latenetwork</span><span class="fu">::</span><span class="fu"><a href="../reference/datageneration.html">datageneration</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">n</span><span class="op">)</span></span></code></pre></div>
 <p>Perform the causal inference with:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Arguments --------------------------------------------------------------------</span></span>
 <span><span class="va">Y</span>   <span class="op">&lt;-</span> <span class="va">data</span><span class="op">$</span><span class="va">Y</span></span>
 <span><span class="va">D</span>   <span class="op">&lt;-</span> <span class="va">data</span><span class="op">$</span><span class="va">D</span></span>
@@ -341,7 +344,7 @@ function.</p>
 <span>                                           B <span class="op">=</span> <span class="va">B</span>,</span>
 <span>                                           alp <span class="op">=</span> <span class="va">alp</span><span class="op">)</span></span></code></pre></div>
 <p>You can see the estimation results with:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result_direct1</span></span>
 <span><span class="co">#&gt;            est     HAC_SE  HAC_CI_L  HAC_CI_U wild_SE wild_CI_L wild_CI_U bw</span></span>
 <span><span class="co">#&gt; ADEY 0.4008916 0.09871458 0.2074146 0.5943686      NA        NA        NA  8</span></span>
