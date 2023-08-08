@@ -1,3 +1,7 @@
+# latenetwork 1.0.1
+
+* Second CRAN submission.
+
 # latenetwork 1.0.0
 
 * First CRAN submission.

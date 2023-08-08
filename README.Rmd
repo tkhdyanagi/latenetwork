@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# latenetwork: Inference on Local Average Treatment Effect Type Parameters under Network Interference of Unknown Form
+# latenetwork: Inference on LATEs under Network Interference of Unknown Form
 
 <!-- badges: start -->
 <!-- badges: end -->

@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# latenetwork: Inference on Local Average Treatment Effect Type Parameters under Network Interference of Unknown Form
+# latenetwork: Inference on LATEs under Network Interference of Unknown Form
 
 <!-- badges: start -->
 <!-- badges: end -->
